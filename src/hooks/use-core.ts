@@ -5,7 +5,7 @@
  * AppState の reducer にディスパッチする。
  */
 
-import { useReducer, useEffect, useRef, useCallback } from 'react'
+import React, { useReducer, useEffect, useRef, useCallback } from 'react'
 import { createCoreClient } from '../rpc/client.js'
 import type { CoreClient } from '../rpc/client.js'
 import type { CoreEvent } from '../rpc/types.js'
@@ -25,6 +25,7 @@ interface UseCoreOptions {
 
 interface UseCoreResult {
   readonly state: AppState
+  readonly dispatch: React.Dispatch<AppAction>
   readonly sendInput: (text: string) => Promise<void>
   readonly sendAbort: () => Promise<void>
 }
@@ -118,5 +119,5 @@ export function useCore(options: UseCoreOptions): UseCoreResult {
     }
   }, [])
 
-  return { state, sendInput, sendAbort }
+  return { state, dispatch, sendInput, sendAbort }
 }

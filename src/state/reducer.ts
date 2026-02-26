@@ -22,6 +22,7 @@ export type AppAction =
     }
   | { readonly type: 'CONNECTED' }
   | { readonly type: 'DISCONNECTED'; readonly error?: string }
+  | { readonly type: 'TOGGLE_TOOL_OUTPUT' }
 
 // =============================================================================
 // Reducer
@@ -113,6 +114,10 @@ export function appReducer(state: AppState, action: AppAction): AppState {
         connected: false,
         error: action.error ?? null,
       }
+    }
+
+    case 'TOGGLE_TOOL_OUTPUT': {
+      return { ...state, toolOutputExpanded: !state.toolOutputExpanded }
     }
   }
 }

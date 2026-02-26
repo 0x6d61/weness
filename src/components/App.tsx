@@ -18,7 +18,7 @@ export function App({ state, inputValue, onInputChange, onSubmit }: AppProps): R
   return (
     <Box flexDirection="column" height="100%">
       <Box flexGrow={1} flexDirection="column">
-        <ChatView messages={state.messages} toolExecutions={state.toolExecutions} />
+        <ChatView messages={state.messages} toolExecutions={state.toolExecutions} toolOutputExpanded={state.toolOutputExpanded} />
       </Box>
       <StatusBar
         agentState={state.agentState}

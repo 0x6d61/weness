@@ -9,7 +9,7 @@ interface UserMessageProps {
 export function UserMessage({ message }: UserMessageProps): React.ReactElement {
   return (
     <Text>
-      <Text dimColor>{'> '}</Text>
+      <Text dimColor>{'❯ '}</Text>
       <Text>{message.content}</Text>
     </Text>
   )

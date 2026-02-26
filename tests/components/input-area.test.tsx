@@ -4,7 +4,7 @@ import React from 'react'
 import { InputArea } from '../../src/components/InputArea.js'
 
 describe('InputArea', () => {
-  it('">" プレフィックスを表示する', () => {
+  it('"❯" プレフィックスを表示する', () => {
     const { lastFrame } = render(
       <InputArea
         value=""
@@ -14,7 +14,7 @@ describe('InputArea', () => {
       />,
     )
     const frame = lastFrame() ?? ''
-    expect(frame).toContain('>')
+    expect(frame).toContain('❯')
   })
 
   it('無効化された状態でテキストを dimmed で表示する', () => {
@@ -30,7 +30,7 @@ describe('InputArea', () => {
     expect(frame).toContain('processing...')
   })
 
-  it('有効な状態でも ">" プレフィックスを表示する', () => {
+  it('有効な状態でも "❯" プレフィックスを表示する', () => {
     const { lastFrame } = render(
       <InputArea
         value="hello"
@@ -40,6 +40,19 @@ describe('InputArea', () => {
       />,
     )
     const frame = lastFrame() ?? ''
-    expect(frame).toContain('>')
+    expect(frame).toContain('❯')
+  })
+
+  it('ボーダーで囲まれている', () => {
+    const { lastFrame } = render(
+      <InputArea
+        value=""
+        onChange={() => {}}
+        onSubmit={() => {}}
+        isDisabled={false}
+      />,
+    )
+    const frame = lastFrame() ?? ''
+    expect(frame).toContain('│')
   })
 })

@@ -12,16 +12,16 @@ interface InputAreaProps {
 export function InputArea({ value, onChange, onSubmit, isDisabled }: InputAreaProps): React.ReactElement {
   if (isDisabled) {
     return (
-      <Box>
-        <Text dimColor>{'> '}</Text>
+      <Box borderStyle="round" borderDimColor paddingLeft={1} paddingRight={1}>
+        <Text dimColor>{'❯ '}</Text>
         <Text dimColor>{value}</Text>
       </Box>
     )
   }
 
   return (
-    <Box>
-      <Text>{'> '}</Text>
+    <Box borderStyle="round" borderDimColor paddingLeft={1} paddingRight={1}>
+      <Text>{'❯ '}</Text>
       <TextInput value={value} onChange={onChange} onSubmit={onSubmit} />
     </Box>
   )

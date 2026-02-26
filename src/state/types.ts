@@ -25,6 +25,7 @@ export interface AppState {
   readonly agentState: AgentState
   readonly connected: boolean
   readonly error: string | null
+  readonly toolOutputExpanded: boolean
 }
 
 export const INITIAL_STATE: AppState = {
@@ -33,4 +34,5 @@ export const INITIAL_STATE: AppState = {
   agentState: 'idle',
   connected: false,
   error: null,
+  toolOutputExpanded: false,
 }

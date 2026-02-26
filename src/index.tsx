@@ -14,6 +14,7 @@ import { createRequire } from 'node:module'
 import { dirname, join } from 'node:path'
 import { useCore } from './hooks/use-core.js'
 import { useInput } from './hooks/use-input.js'
+import { useKeyboardShortcuts } from './hooks/use-keyboard-shortcuts.js'
 import { App } from './components/App.js'
 import { SetupWizard } from './components/SetupWizard.js'
 import { checkConfigExists } from './setup/check.js'
@@ -28,10 +29,14 @@ interface WnAppProps {
 }
 
 function WnApp({ corePath, coreArgs }: WnAppProps): React.ReactElement {
-  const { state, sendInput, sendAbort } = useCore({ corePath, coreArgs })
+  const { state, dispatch, sendInput, sendAbort } = useCore({ corePath, coreArgs })
   const { value, onChange, handleSubmit, isDisabled } = useInput({
     agentState: state.agentState,
     onSubmit: sendInput,
+  })
+
+  useKeyboardShortcuts({
+    onToggleToolOutput: () => dispatch({ type: 'TOGGLE_TOOL_OUTPUT' }),
   })
 
   return (

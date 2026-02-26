@@ -40,8 +40,8 @@ describe('App', () => {
     expect(frame).toContain('Hello user')
     // StatusBar
     expect(frame).toContain('idle')
-    // InputArea ">" prefix
-    expect(frame).toContain('>')
+    // InputArea "❯" prefix
+    expect(frame).toContain('❯')
   })
 
   it('ステータスバーを表示する', () => {

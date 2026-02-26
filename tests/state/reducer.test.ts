@@ -201,6 +201,26 @@ describe('appReducer', () => {
     expect(state.messages[3]!.content).toBe('reply2')
   })
 
+  it('INITIAL_STATE.toolOutputExpanded は false である', () => {
+    expect(INITIAL_STATE.toolOutputExpanded).toBe(false)
+  })
+
+  it('TOGGLE_TOOL_OUTPUT は toolOutputExpanded を false → true に反転する', () => {
+    const state: AppState = { ...INITIAL_STATE, toolOutputExpanded: false }
+    const action: AppAction = { type: 'TOGGLE_TOOL_OUTPUT' }
+    const next = appReducer(state, action)
+
+    expect(next.toolOutputExpanded).toBe(true)
+  })
+
+  it('TOGGLE_TOOL_OUTPUT は toolOutputExpanded を true → false に反転する', () => {
+    const state: AppState = { ...INITIAL_STATE, toolOutputExpanded: true }
+    const action: AppAction = { type: 'TOGGLE_TOOL_OUTPUT' }
+    const next = appReducer(state, action)
+
+    expect(next.toolOutputExpanded).toBe(false)
+  })
+
   it('TOOL_END は最後の running ツール実行を更新する（同名複数）', () => {
     const stateWithMultipleTools: AppState = {
       ...INITIAL_STATE,
