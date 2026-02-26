@@ -216,16 +216,17 @@ export function validateCorePath(rawPath: string): string {
   // 絶対パスに正規化
   const resolved = pathResolve(rawPath)
 
-  // 実行可能ファイルの存在チェック
+  // 実行可能ファイルの存在チェック（プラットフォーム別）
   try {
-    accessSync(resolved, constants.X_OK)
-  } catch {
-    // Windows ではファイルの存在確認のみ行う（X_OK が常にパスしてしまうため）
-    try {
+    if (process.platform === 'win32') {
+      // Windows: X_OK は F_OK と同等で意味がないため、読み取り可能性のみ検証
       accessSync(resolved, constants.R_OK)
-    } catch {
-      throw new Error(`corePath is not accessible: ${resolved}`)
+    } else {
+      // Unix (Linux/macOS): 実行権限を検証（フォールバックなし）
+      accessSync(resolved, constants.X_OK)
     }
+  } catch {
+    throw new Error(`corePath is not accessible: ${resolved}`)
   }
 
   return resolved
