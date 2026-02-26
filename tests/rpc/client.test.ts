@@ -520,4 +520,88 @@ describe('createCoreClient', () => {
       unlinkSync(tmpFile)
     }
   })
+
+  it('存在しないコマンドを spawn した場合 onExit が呼ばれる', async () => {
+    const { createCoreClient } = await import('../../src/rpc/client.js')
+    const onEvent = vi.fn()
+    const onExit = vi.fn()
+
+    // validateCorePath をバイパスするため、node の -e で即座に exit するスクリプト
+    const client = createCoreClient({
+      corePath: process.execPath,
+      coreArgs: ['-e', 'process.exit(1)'],
+      onEvent,
+      onExit,
+    })
+
+    // プロセスが終了するまでポーリング
+    for (let i = 0; i < 20; i++) {
+      if (onExit.mock.calls.length > 0) break
+      await new Promise((resolve) => setTimeout(resolve, 100))
+    }
+
+    expect(onExit).toHaveBeenCalledWith(1)
+    client.kill()
+  })
+
+  it('stderr 出力が onStderr コールバックに渡される', async () => {
+    const { createCoreClient } = await import('../../src/rpc/client.js')
+
+    const STDERR_SCRIPT = `
+      process.stderr.write('error message from core\\n');
+      setTimeout(() => {}, 500);
+    `
+
+    const onEvent = vi.fn()
+    const onExit = vi.fn()
+    const onStderr = vi.fn()
+
+    const client = createCoreClient({
+      corePath: process.execPath,
+      coreArgs: ['-e', STDERR_SCRIPT],
+      onEvent,
+      onExit,
+      onStderr,
+    })
+
+    // stderr が届くまで待つ
+    for (let i = 0; i < 20; i++) {
+      if (onStderr.mock.calls.length > 0) break
+      await new Promise((resolve) => setTimeout(resolve, 100))
+    }
+
+    try {
+      expect(onStderr).toHaveBeenCalledWith('error message from core')
+    } finally {
+      client.kill()
+    }
+  })
+
+  it('onStderr が未指定でも stderr が出力されてクラッシュしない', async () => {
+    const { createCoreClient } = await import('../../src/rpc/client.js')
+
+    const STDERR_SCRIPT = `
+      process.stderr.write('some error\\n');
+      process.exit(0);
+    `
+
+    const onEvent = vi.fn()
+    const onExit = vi.fn()
+
+    // onStderr を指定しない
+    const client = createCoreClient({
+      corePath: process.execPath,
+      coreArgs: ['-e', STDERR_SCRIPT],
+      onEvent,
+      onExit,
+    })
+
+    for (let i = 0; i < 20; i++) {
+      if (onExit.mock.calls.length > 0) break
+      await new Promise((resolve) => setTimeout(resolve, 100))
+    }
+
+    expect(onExit).toHaveBeenCalledWith(0)
+    client.kill()
+  })
 })

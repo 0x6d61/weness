@@ -94,7 +94,10 @@ function resolveCoreCliPath(): string {
 
 function main(): void {
   const corePath = resolveCoreCliPath()
-  const coreArgs = process.argv.slice(2)
+  // wn-core は 'serve' サブコマンドで JSON-RPC サーバーとして起動する
+  // ユーザーの CLI 引数はその後に渡す
+  const userArgs = process.argv.slice(2)
+  const coreArgs = ['serve', ...userArgs]
 
   render(<Root corePath={corePath} coreArgs={coreArgs} />)
 }
