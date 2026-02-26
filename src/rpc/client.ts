@@ -261,9 +261,14 @@ export function createCoreClient(options: CoreClientOptions): CoreClient {
   >()
   let nextId = 1
 
+  // .js ファイルの場合は node 経由で起動（Windows では .js を直接 spawn できない）
+  const isJsFile = sanitizedPath.endsWith('.js')
+  const command = isJsFile ? process.execPath : sanitizedPath
+  const args = isJsFile ? [sanitizedPath, ...coreArgs] : [...coreArgs]
+
   // 検証済みパスで子プロセスを起動（shell: false でシェル経由しない）
   // nosemgrep: javascript.lang.security.detect-child-process.detect-child-process
-  const child = spawn(sanitizedPath, [...coreArgs], {
+  const child = spawn(command, args, {
     stdio: ['pipe', 'pipe', 'pipe'],
     shell: false,
   })
