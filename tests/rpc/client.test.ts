@@ -1,4 +1,7 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, vi } from 'vitest'
+import { writeFileSync, unlinkSync } from 'node:fs'
+import { tmpdir } from 'node:os'
+import { join } from 'node:path'
 import { parseNotification, validateCorePath } from '../../src/rpc/client.js'
 import type { CoreEvent } from '../../src/rpc/types.js'
 
@@ -481,5 +484,40 @@ describe('createCoreClient', () => {
     await new Promise((resolve) => setTimeout(resolve, 300))
 
     expect(onExit).toHaveBeenCalled()
+  })
+
+  it('.js ファイルを process.execPath 経由で起動し通信できる', async () => {
+    const tmpFile = join(tmpdir(), `wn-test-${Date.now()}.js`)
+    const script = [
+      "const readline = require('readline');",
+      "const rl = readline.createInterface({ input: process.stdin });",
+      "rl.on('line', (line) => {",
+      '  try {',
+      '    const req = JSON.parse(line);',
+      "    const res = { jsonrpc: '2.0', id: req.id, result: { pong: true } };",
+      "    process.stdout.write(JSON.stringify(res) + '\\n');",
+      '  } catch (e) {}',
+      '});',
+    ].join('\n')
+    writeFileSync(tmpFile, script)
+
+    try {
+      const { createCoreClient } = await import('../../src/rpc/client.js')
+      const onEvent = vi.fn()
+      const onExit = vi.fn()
+
+      const client = createCoreClient({
+        corePath: tmpFile,
+        coreArgs: [],
+        onEvent,
+        onExit,
+      })
+
+      const result = await client.sendInput('test')
+      expect(result).toEqual({ pong: true })
+      client.kill()
+    } finally {
+      unlinkSync(tmpFile)
+    }
   })
 })

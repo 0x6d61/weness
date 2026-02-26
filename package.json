@@ -25,9 +25,10 @@
   },
   "license": "MIT",
   "dependencies": {
-    "@0x6d61/wn-core": "^0.1.0",
+    "@0x6d61/wn-core": "^0.1.2",
     "chalk": "^5.6.2",
     "ink": "^6.8.0",
+    "ink-select-input": "^6.2.0",
     "ink-spinner": "^5.0.0",
     "ink-text-input": "^6.0.0",
     "react": "^19.2.4"

@@ -4,15 +4,19 @@
  *
  * CLI 引数をパースし、wn-core プロセスを起動して
  * Ink ベースの TUI をレンダリングする。
+ *
+ * ~/.wn/config.json が存在しない場合はセットアップウィザードを表示する。
  */
 
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import { render } from 'ink'
 import { createRequire } from 'node:module'
 import { dirname, join } from 'node:path'
 import { useCore } from './hooks/use-core.js'
 import { useInput } from './hooks/use-input.js'
 import { App } from './components/App.js'
+import { SetupWizard } from './components/SetupWizard.js'
+import { checkConfigExists } from './setup/check.js'
 
 // =============================================================================
 // WnApp コンポーネント
@@ -41,6 +45,27 @@ function WnApp({ corePath, coreArgs }: WnAppProps): React.ReactElement {
 }
 
 // =============================================================================
+// Root コンポーネント（セットアップ or 通常起動の分岐）
+// =============================================================================
+
+interface RootProps {
+  readonly corePath: string
+  readonly coreArgs: readonly string[]
+}
+
+function Root({ corePath, coreArgs }: RootProps): React.ReactElement | null {
+  const [needsSetup, setNeedsSetup] = useState<boolean | null>(null)
+
+  useEffect(() => {
+    setNeedsSetup(!checkConfigExists())
+  }, [])
+
+  if (needsSetup === null) return null // 初期チェック中
+  if (needsSetup) return <SetupWizard onComplete={() => setNeedsSetup(false)} />
+  return <WnApp corePath={corePath} coreArgs={coreArgs} />
+}
+
+// =============================================================================
 // CLI エントリポイント
 // =============================================================================
 
@@ -62,7 +87,7 @@ function resolveCoreCliPath(): string {
     // フォールバック: 直接パスを指定（開発時など）
     throw new Error(
       'Could not resolve @0x6d61/wn-core CLI path. ' +
-      'Make sure @0x6d61/wn-core is installed.',
+        'Make sure @0x6d61/wn-core is installed.',
     )
   }
 }
@@ -71,7 +96,7 @@ function main(): void {
   const corePath = resolveCoreCliPath()
   const coreArgs = process.argv.slice(2)
 
-  render(<WnApp corePath={corePath} coreArgs={coreArgs} />)
+  render(<Root corePath={corePath} coreArgs={coreArgs} />)
 }
 
 main()
