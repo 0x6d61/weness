@@ -86,6 +86,10 @@ export function useCore(options: UseCoreOptions): UseCoreResult {
           error: `Process exited with code ${String(code)}`,
         })
       },
+      onStderr: (line: string) => {
+        // stderr 出力をエラーログとして dispatch
+        dispatch({ type: 'LOG', level: 'error', message: `[core] ${line}` })
+      },
     })
 
     clientRef.current = client

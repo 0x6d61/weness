@@ -42,6 +42,7 @@ export interface CoreClientOptions {
   readonly coreArgs?: readonly string[]
   readonly onEvent: (event: CoreEvent) => void
   readonly onExit: (code: number | null) => void
+  readonly onStderr?: (line: string) => void
 }
 
 /** Core プロセスとの通信クライアント */
@@ -247,7 +248,7 @@ export function validateCorePath(rawPath: string): string {
  * @throws {Error} corePath が不正または実行不可能な場合
  */
 export function createCoreClient(options: CoreClientOptions): CoreClient {
-  const { corePath, coreArgs = [], onEvent, onExit } = options
+  const { corePath, coreArgs = [], onEvent, onExit, onStderr } = options
 
   // corePath を検証・サニタイズ（危険な文字の排除、絶対パスへの正規化、存在チェック）
   const sanitizedPath = validateCorePath(corePath)
@@ -315,6 +316,22 @@ export function createCoreClient(options: CoreClientOptions): CoreClient {
       // パースに失敗した通知は無視（クラッシュしない）
       return
     }
+  })
+
+  // stderr を行単位で読み取り、onStderr コールバックに渡す
+  if (onStderr) {
+    const stderrRl = createInterface({ input: child.stderr! })
+    stderrRl.on('line', (line: string) => {
+      onStderr(line)
+    })
+  }
+
+  // spawn 自体のエラー（ファイルが見つからない等）
+  // close イベントがエラー後に発火するので、ここでは追加の処理は不要
+  // ただし、ハンドラがないと unhandled error で crash するため登録する
+  child.on('error', () => {
+    // spawn error の場合は close イベントが code=null で発火する
+    // onExit は close ハンドラが呼ぶので、ここでは何もしない
   })
 
   // 子プロセスの終了イベント
