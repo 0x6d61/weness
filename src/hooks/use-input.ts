@@ -31,7 +31,7 @@ interface UseInputResult {
 /**
  * 入力エリアの制御を行うカスタムフック。
  *
- * - agentState が 'thinking' または 'tool_running' のとき入力を無効化
+ * - agentState が 'tool_running' のとき入力を無効化
  * - handleSubmit で onSubmit を呼び出し、value をリセット
  * - 空文字列の submit は無視
  */
@@ -39,7 +39,7 @@ export function useInput(options: UseInputOptions): UseInputResult {
   const { agentState, onSubmit } = options
   const [value, setValue] = useState('')
 
-  const isDisabled = agentState === 'thinking' || agentState === 'tool_running'
+  const isDisabled = agentState === 'tool_running'
 
   const onChange = useCallback((newValue: string): void => {
     setValue(newValue)

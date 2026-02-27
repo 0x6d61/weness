@@ -22,7 +22,7 @@ describe('ToolBlock', () => {
     }
     const { lastFrame } = render(<ToolBlock execution={execution} expanded={false} />)
     const frame = lastFrame() ?? ''
-    expect(frame).toContain('Bash(nmap -sV 10.0.0.1)')
+    expect(frame).toContain('Shell(nmap -sV 10.0.0.1)')
   })
 
   it('running 状態で ● を表示する', () => {
@@ -141,7 +141,7 @@ describe('ToolBlock', () => {
     }
     const { lastFrame } = render(<ToolBlock execution={execution} expanded={false} />)
     const frame = lastFrame() ?? ''
-    expect(frame).toContain('Bash(' + 'a'.repeat(60) + '…)')
+    expect(frame).toContain('Shell(' + 'a'.repeat(60) + '…)')
     expect(frame).not.toContain('a'.repeat(80))
   })
 })

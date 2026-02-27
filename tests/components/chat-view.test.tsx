@@ -46,7 +46,7 @@ describe('ChatView', () => {
       <ChatView messages={[]} toolExecutions={toolExecutions} toolOutputExpanded={false} />,
     )
     const frame = lastFrame() ?? ''
-    expect(frame).toContain('Bash')
+    expect(frame).toContain('Shell')
     expect(frame).toContain('ls -la')
   })
 
@@ -82,7 +82,7 @@ describe('ChatView', () => {
     const frame = lastFrame() ?? ''
     // All three items should be present
     expect(frame).toContain('run ls')
-    expect(frame).toContain('Bash')
+    expect(frame).toContain('Shell')
     expect(frame).toContain('here are the results')
   })
 

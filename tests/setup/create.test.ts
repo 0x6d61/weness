@@ -58,7 +58,7 @@ describe('createInitialConfig', () => {
 
       const config: WnConfig = JSON.parse(readFileSync(configPath, 'utf-8'))
       expect(config.defaultProvider).toBe('claude')
-      expect(config.defaultModel).toBe('claude-sonnet-4-20250514')
+      expect(config.defaultModel).toBe('claude-sonnet-4-6-20260217')
       expect(config.defaultPersona).toBe('default')
       expect(config.providers).toEqual({
         claude: { apiKey: 'sk-claude-key' },
@@ -92,7 +92,7 @@ describe('createInitialConfig', () => {
   // ===========================================================================
 
   describe('各プロバイダー別テスト', () => {
-    it('Claude (API Key): apiKey が設定される、モデルが claude-sonnet-4-20250514', () => {
+    it('Claude (API Key): apiKey が設定される、モデルが claude-sonnet-4-6-20260217', () => {
       const input: SetupResult = { provider: 'claude', authMethod: 'apiKey', credential: 'sk-ant-key123' }
       createInitialConfig(input, testDir)
 
@@ -100,7 +100,7 @@ describe('createInitialConfig', () => {
         readFileSync(join(testDir, '.wn', 'config.json'), 'utf-8'),
       )
       expect(config.defaultProvider).toBe('claude')
-      expect(config.defaultModel).toBe('claude-sonnet-4-20250514')
+      expect(config.defaultModel).toBe('claude-sonnet-4-6-20260217')
       expect(config.providers.claude?.apiKey).toBe('sk-ant-key123')
       expect(config.providers.claude?.authToken).toBeUndefined()
     })
@@ -113,7 +113,7 @@ describe('createInitialConfig', () => {
         readFileSync(join(testDir, '.wn', 'config.json'), 'utf-8'),
       )
       expect(config.defaultProvider).toBe('claude')
-      expect(config.defaultModel).toBe('claude-sonnet-4-20250514')
+      expect(config.defaultModel).toBe('claude-sonnet-4-6-20260217')
       expect(config.providers.claude?.authToken).toBe('oauth-token-abc')
     })
 
@@ -128,7 +128,7 @@ describe('createInitialConfig', () => {
       expect(config.providers.claude?.authToken).toBe('oauth-token-xyz')
     })
 
-    it('OpenAI: apiKey が設定される、モデルが gpt-4o', () => {
+    it('OpenAI: apiKey が設定される、モデルが gpt-4.1', () => {
       const input: SetupResult = { provider: 'openai', authMethod: 'apiKey', credential: 'sk-openai-key456' }
       createInitialConfig(input, testDir)
 
@@ -136,11 +136,11 @@ describe('createInitialConfig', () => {
         readFileSync(join(testDir, '.wn', 'config.json'), 'utf-8'),
       )
       expect(config.defaultProvider).toBe('openai')
-      expect(config.defaultModel).toBe('gpt-4o')
+      expect(config.defaultModel).toBe('gpt-4.1')
       expect(config.providers.openai?.apiKey).toBe('sk-openai-key456')
     })
 
-    it('Ollama: apiKey なし、baseUrl が設定される、モデルが llama3.1', () => {
+    it('Ollama: apiKey なし、baseUrl が設定される、モデルが llama3.3', () => {
       const input: SetupResult = { provider: 'ollama', authMethod: 'apiKey', credential: '' }
       createInitialConfig(input, testDir)
 
@@ -148,12 +148,12 @@ describe('createInitialConfig', () => {
         readFileSync(join(testDir, '.wn', 'config.json'), 'utf-8'),
       )
       expect(config.defaultProvider).toBe('ollama')
-      expect(config.defaultModel).toBe('llama3.1')
+      expect(config.defaultModel).toBe('llama3.3')
       expect(config.providers.ollama?.apiKey).toBeUndefined()
       expect(config.providers.ollama?.baseUrl).toBe('http://localhost:11434')
     })
 
-    it('Gemini: apiKey が設定される、モデルが gemini-2.0-flash', () => {
+    it('Gemini: apiKey が設定される、モデルが gemini-2.5-flash', () => {
       const input: SetupResult = { provider: 'gemini', authMethod: 'apiKey', credential: 'gemini-key789' }
       createInitialConfig(input, testDir)
 
@@ -161,7 +161,7 @@ describe('createInitialConfig', () => {
         readFileSync(join(testDir, '.wn', 'config.json'), 'utf-8'),
       )
       expect(config.defaultProvider).toBe('gemini')
-      expect(config.defaultModel).toBe('gemini-2.0-flash')
+      expect(config.defaultModel).toBe('gemini-2.5-flash')
       expect(config.providers.gemini?.apiKey).toBe('gemini-key789')
     })
   })

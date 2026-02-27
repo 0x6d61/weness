@@ -10,7 +10,7 @@ interface ToolBlockProps {
 
 // ツール名の表示マッピング
 const TOOL_DISPLAY_NAMES: Record<string, string> = {
-  shell: 'Bash',
+  shell: 'Shell',
   read: 'Read',
   write: 'Write',
   glob: 'Glob',

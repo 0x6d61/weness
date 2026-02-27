@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render } from 'ink-testing-library'
 import React from 'react'
 import { StatusBar } from '../../src/components/StatusBar.js'
@@ -13,13 +13,20 @@ describe('StatusBar', () => {
     expect(frame).toContain('idle')
   })
 
-  it('thinking 状態を表示する', () => {
+  it('thinking 状態でスピナー文字を表示する', () => {
+    vi.useFakeTimers()
     const { lastFrame } = render(
       <StatusBar agentState="thinking" connected={true} error={null} />,
     )
     const frame = lastFrame() ?? ''
-    expect(frame).toContain('●')
+    // スピナーフレームのいずれかが含まれる（初期は最初のフレーム）
+    const spinnerFrames = ['⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '⠇', '⠏']
+    const hasSpinnerChar = spinnerFrames.some((f) => frame.includes(f))
+    expect(hasSpinnerChar).toBe(true)
     expect(frame).toContain('thinking')
+    // 静的な ● ではないことを確認
+    expect(frame).not.toContain('●')
+    vi.useRealTimers()
   })
 
   it('waiting_input 状態を表示する', () => {

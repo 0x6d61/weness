@@ -26,6 +26,9 @@ export interface AppState {
   readonly connected: boolean
   readonly error: string | null
   readonly toolOutputExpanded: boolean
+  readonly provider: string | null
+  readonly model: string | null
+  readonly selectMode: 'provider' | 'model' | null
 }
 
 export const INITIAL_STATE: AppState = {
@@ -35,4 +38,7 @@ export const INITIAL_STATE: AppState = {
   connected: false,
   error: null,
   toolOutputExpanded: false,
+  provider: null,
+  model: null,
+  selectMode: null,
 }

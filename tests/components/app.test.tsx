@@ -11,6 +11,8 @@ describe('App', () => {
       ...INITIAL_STATE,
       connected: true,
       agentState: 'idle',
+      provider: 'claude',
+      model: 'claude-sonnet-4-20250514',
       messages: [
         {
           id: 'msg-1',
@@ -49,6 +51,8 @@ describe('App', () => {
       ...INITIAL_STATE,
       connected: true,
       agentState: 'thinking',
+      provider: 'claude',
+      model: 'claude-sonnet-4-20250514',
     }
     const { lastFrame } = render(
       <App
@@ -60,7 +64,10 @@ describe('App', () => {
     )
     const frame = lastFrame() ?? ''
     expect(frame).toContain('thinking')
-    expect(frame).toContain('●')
+    // thinking 状態ではスピナー文字が表示される（● ではない）
+    const spinnerFrames = ['⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '⠇', '⠏']
+    const hasSpinner = spinnerFrames.some((f) => frame.includes(f))
+    expect(hasSpinner).toBe(true)
   })
 
   it('未接続状態を表示する', () => {
@@ -68,6 +75,8 @@ describe('App', () => {
       ...INITIAL_STATE,
       connected: false,
       agentState: 'idle',
+      provider: 'claude',
+      model: 'claude-sonnet-4-20250514',
     }
     const { lastFrame } = render(
       <App
@@ -87,6 +96,8 @@ describe('App', () => {
       connected: true,
       agentState: 'idle',
       error: 'Something went wrong',
+      provider: 'claude',
+      model: 'claude-sonnet-4-20250514',
     }
     const { lastFrame } = render(
       <App
@@ -98,5 +109,77 @@ describe('App', () => {
     )
     const frame = lastFrame() ?? ''
     expect(frame).toContain('Something went wrong')
+  })
+
+  it('selectMode が provider の時、プロバイダー選択UIを表示する', () => {
+    const state: AppState = {
+      ...INITIAL_STATE,
+      connected: true,
+      agentState: 'idle',
+      provider: 'claude',
+      model: 'claude-sonnet-4-20250514',
+      selectMode: 'provider',
+    }
+    const { lastFrame } = render(
+      <App
+        state={state}
+        inputValue=""
+        onInputChange={() => {}}
+        onSubmit={() => {}}
+      />,
+    )
+    const frame = lastFrame() ?? ''
+    // ProviderSelector のテキストが表示されること
+    expect(frame).toContain('Select provider:')
+    expect(frame).toContain('Claude')
+    // InputArea のボーダーボックスは表示されないこと（❯ は SelectInput でも使われるため、InputArea 固有の罫線で判定）
+    expect(frame).not.toContain('╭')
+    expect(frame).not.toContain('╰')
+  })
+
+  it('selectMode が model の時、モデル選択UIを表示する', () => {
+    const state: AppState = {
+      ...INITIAL_STATE,
+      connected: true,
+      agentState: 'idle',
+      provider: 'claude',
+      model: 'claude-sonnet-4-6-20260217',
+      selectMode: 'model',
+    }
+    const { lastFrame } = render(
+      <App
+        state={state}
+        inputValue=""
+        onInputChange={() => {}}
+        onSubmit={() => {}}
+      />,
+    )
+    const frame = lastFrame() ?? ''
+    expect(frame).toContain('Select model:')
+    expect(frame).toContain('Claude Sonnet 4.6')
+    // InputArea のボーダーボックスは表示されないこと
+    expect(frame).not.toContain('╭')
+    expect(frame).not.toContain('╰')
+  })
+
+  it('WelcomeBanner を表示する', () => {
+    const state: AppState = {
+      ...INITIAL_STATE,
+      connected: true,
+      agentState: 'idle',
+      provider: 'claude',
+      model: 'claude-sonnet-4-20250514',
+    }
+    const { lastFrame } = render(
+      <App
+        state={state}
+        inputValue=""
+        onInputChange={() => {}}
+        onSubmit={() => {}}
+      />,
+    )
+    const frame = lastFrame() ?? ''
+    expect(frame).toContain('weness')
+    expect(frame).toContain('oOOOo')
   })
 })
