@@ -8,6 +8,9 @@
   "bin": {
     "wn": "dist/index.js"
   },
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "build": "tsup",
     "dev": "tsx src/index.tsx",
