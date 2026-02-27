@@ -5,7 +5,7 @@
  * AppState の reducer にディスパッチする。
  */
 
-import { useReducer, useEffect, useRef, useCallback } from 'react'
+import React, { useReducer, useEffect, useRef, useCallback } from 'react'
 import { createCoreClient } from '../rpc/client.js'
 import type { CoreClient } from '../rpc/client.js'
 import type { CoreEvent } from '../rpc/types.js'
@@ -13,6 +13,7 @@ import { appReducer } from '../state/reducer.js'
 import type { AppAction } from '../state/reducer.js'
 import type { AppState } from '../state/types.js'
 import { INITIAL_STATE } from '../state/types.js'
+import { classifyStderrLevel } from './classify-stderr.js'
 
 // =============================================================================
 // Types
@@ -25,8 +26,10 @@ interface UseCoreOptions {
 
 interface UseCoreResult {
   readonly state: AppState
+  readonly dispatch: React.Dispatch<AppAction>
   readonly sendInput: (text: string) => Promise<void>
   readonly sendAbort: () => Promise<void>
+  readonly sendConfigUpdate: (params: { provider?: string; model?: string }) => Promise<void>
 }
 
 // =============================================================================
@@ -87,8 +90,8 @@ export function useCore(options: UseCoreOptions): UseCoreResult {
         })
       },
       onStderr: (line: string) => {
-        // stderr 出力をエラーログとして dispatch
-        dispatch({ type: 'LOG', level: 'error', message: `[core] ${line}` })
+        const level = classifyStderrLevel(line)
+        dispatch({ type: 'LOG', level, message: `[core] ${line}` })
       },
     })
 
@@ -118,5 +121,16 @@ export function useCore(options: UseCoreOptions): UseCoreResult {
     }
   }, [])
 
-  return { state, sendInput, sendAbort }
+  const sendConfigUpdate = useCallback(
+    async (params: { provider?: string; model?: string }): Promise<void> => {
+      const client = clientRef.current
+      if (client) {
+        await client.sendConfigUpdate(params)
+        dispatch({ type: 'CONFIG_UPDATE', ...params })
+      }
+    },
+    [],
+  )
+
+  return { state, dispatch, sendInput, sendAbort, sendConfigUpdate }
 }

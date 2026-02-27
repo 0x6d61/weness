@@ -182,6 +182,25 @@ describe('appReducer', () => {
     expect(next2.error).toBeNull()
   })
 
+  it('USER_INPUT は error をクリアする', () => {
+    const state: AppState = { ...INITIAL_STATE, error: 'previous error' }
+    const action: AppAction = { type: 'USER_INPUT', text: 'hello' }
+    const next = appReducer(state, action)
+    expect(next.error).toBeNull()
+  })
+
+  it('CONFIG_UPDATE は error をクリアする', () => {
+    const state: AppState = {
+      ...INITIAL_STATE,
+      provider: 'claude',
+      model: 'claude-sonnet-4-20250514',
+      error: 'previous error',
+    }
+    const action: AppAction = { type: 'CONFIG_UPDATE', model: 'gpt-4o' }
+    const next = appReducer(state, action)
+    expect(next.error).toBeNull()
+  })
+
   it('複数のメッセージが順序通りに蓄積される', () => {
     let state = INITIAL_STATE
 
@@ -199,6 +218,26 @@ describe('appReducer', () => {
     expect(state.messages[2]!.content).toBe('second')
     expect(state.messages[3]!.role).toBe('assistant')
     expect(state.messages[3]!.content).toBe('reply2')
+  })
+
+  it('INITIAL_STATE.toolOutputExpanded は false である', () => {
+    expect(INITIAL_STATE.toolOutputExpanded).toBe(false)
+  })
+
+  it('TOGGLE_TOOL_OUTPUT は toolOutputExpanded を false → true に反転する', () => {
+    const state: AppState = { ...INITIAL_STATE, toolOutputExpanded: false }
+    const action: AppAction = { type: 'TOGGLE_TOOL_OUTPUT' }
+    const next = appReducer(state, action)
+
+    expect(next.toolOutputExpanded).toBe(true)
+  })
+
+  it('TOGGLE_TOOL_OUTPUT は toolOutputExpanded を true → false に反転する', () => {
+    const state: AppState = { ...INITIAL_STATE, toolOutputExpanded: true }
+    const action: AppAction = { type: 'TOGGLE_TOOL_OUTPUT' }
+    const next = appReducer(state, action)
+
+    expect(next.toolOutputExpanded).toBe(false)
   })
 
   it('TOOL_END は最後の running ツール実行を更新する（同名複数）', () => {
@@ -239,5 +278,110 @@ describe('appReducer', () => {
     expect(next.toolExecutions[1]!.status).toBe('completed')
     expect(next.toolExecutions[1]!.result?.output).toBe('second scan done')
     expect(next.toolExecutions[1]!.completedAt).toEqual(expect.any(Number))
+  })
+
+  describe('INITIAL_STATE の provider/model', () => {
+    it('INITIAL_STATE.provider は null である', () => {
+      expect(INITIAL_STATE.provider).toBeNull()
+    })
+
+    it('INITIAL_STATE.model は null である', () => {
+      expect(INITIAL_STATE.model).toBeNull()
+    })
+  })
+
+  describe('SET_CONFIG', () => {
+    it('provider と model を設定する', () => {
+      const action: AppAction = {
+        type: 'SET_CONFIG',
+        provider: 'claude',
+        model: 'claude-sonnet-4-20250514',
+      }
+      const next = appReducer(INITIAL_STATE, action)
+      expect(next.provider).toBe('claude')
+      expect(next.model).toBe('claude-sonnet-4-20250514')
+    })
+  })
+
+  describe('INITIAL_STATE の selectMode', () => {
+    it('INITIAL_STATE.selectMode は null である', () => {
+      expect(INITIAL_STATE.selectMode).toBeNull()
+    })
+  })
+
+  describe('ENTER_PROVIDER_SELECT', () => {
+    it('selectMode を provider に設定する', () => {
+      const action: AppAction = { type: 'ENTER_PROVIDER_SELECT' }
+      const next = appReducer(INITIAL_STATE, action)
+      expect(next.selectMode).toBe('provider')
+    })
+  })
+
+  describe('EXIT_PROVIDER_SELECT', () => {
+    it('selectMode を null に戻す', () => {
+      const state: AppState = { ...INITIAL_STATE, selectMode: 'provider' }
+      const action: AppAction = { type: 'EXIT_PROVIDER_SELECT' }
+      const next = appReducer(state, action)
+      expect(next.selectMode).toBeNull()
+    })
+  })
+
+  describe('ENTER_MODEL_SELECT', () => {
+    it('selectMode を model に設定する', () => {
+      const action: AppAction = { type: 'ENTER_MODEL_SELECT' }
+      const next = appReducer(INITIAL_STATE, action)
+      expect(next.selectMode).toBe('model')
+    })
+  })
+
+  describe('EXIT_MODEL_SELECT', () => {
+    it('selectMode を null に戻す', () => {
+      const state: AppState = { ...INITIAL_STATE, selectMode: 'model' }
+      const action: AppAction = { type: 'EXIT_MODEL_SELECT' }
+      const next = appReducer(state, action)
+      expect(next.selectMode).toBeNull()
+    })
+  })
+
+  describe('CONFIG_UPDATE', () => {
+    it('provider のみ更新する', () => {
+      const state: AppState = {
+        ...INITIAL_STATE,
+        provider: 'claude',
+        model: 'claude-sonnet-4-20250514',
+      }
+      const action: AppAction = { type: 'CONFIG_UPDATE', provider: 'openai' }
+      const next = appReducer(state, action)
+      expect(next.provider).toBe('openai')
+      expect(next.model).toBe('claude-sonnet-4-20250514')
+    })
+
+    it('model のみ更新する', () => {
+      const state: AppState = {
+        ...INITIAL_STATE,
+        provider: 'claude',
+        model: 'claude-sonnet-4-20250514',
+      }
+      const action: AppAction = { type: 'CONFIG_UPDATE', model: 'gpt-4o' }
+      const next = appReducer(state, action)
+      expect(next.provider).toBe('claude')
+      expect(next.model).toBe('gpt-4o')
+    })
+
+    it('provider と model を同時に更新する', () => {
+      const state: AppState = {
+        ...INITIAL_STATE,
+        provider: 'claude',
+        model: 'claude-sonnet-4-20250514',
+      }
+      const action: AppAction = {
+        type: 'CONFIG_UPDATE',
+        provider: 'openai',
+        model: 'gpt-4o',
+      }
+      const next = appReducer(state, action)
+      expect(next.provider).toBe('openai')
+      expect(next.model).toBe('gpt-4o')
+    })
   })
 })

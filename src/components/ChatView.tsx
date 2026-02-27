@@ -9,6 +9,7 @@ import { ToolBlock } from './ToolBlock.js'
 interface ChatViewProps {
   readonly messages: AppState['messages']
   readonly toolExecutions: AppState['toolExecutions']
+  readonly toolOutputExpanded: boolean
 }
 
 type TimelineItem =
@@ -33,7 +34,13 @@ function buildTimeline(
   return items
 }
 
-function TimelineEntry({ item }: { readonly item: TimelineItem }): React.ReactElement {
+function TimelineEntry({
+  item,
+  expanded,
+}: {
+  readonly item: TimelineItem
+  readonly expanded: boolean
+}): React.ReactElement {
   if (item.kind === 'message') {
     const msg = item.data
     if (msg.role === 'user') {
@@ -41,18 +48,23 @@ function TimelineEntry({ item }: { readonly item: TimelineItem }): React.ReactEl
     }
     return <AssistantMessage message={msg} />
   }
-  return <ToolBlock execution={item.data} />
+  return <ToolBlock execution={item.data} expanded={expanded} />
 }
 
-export function ChatView({ messages, toolExecutions }: ChatViewProps): React.ReactElement {
+export function ChatView({
+  messages,
+  toolExecutions,
+  toolOutputExpanded,
+}: ChatViewProps): React.ReactElement {
   const timeline = buildTimeline(messages, toolExecutions)
 
   return (
     <Box flexDirection="column" gap={1}>
-      {timeline.map((item, index) => (
+      {timeline.map((item) => (
         <TimelineEntry
           key={item.kind === 'message' ? item.data.id : item.data.id}
           item={item}
+          expanded={toolOutputExpanded}
         />
       ))}
     </Box>

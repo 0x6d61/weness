@@ -112,13 +112,13 @@ describe('useInput', () => {
     expect(frame).toContain('disabled:false')
   })
 
-  it('agentState が thinking のとき isDisabled は true', () => {
+  it('agentState が thinking のとき isDisabled は false', () => {
     const onSubmit = vi.fn().mockResolvedValue(undefined)
     const { lastFrame } = render(
       <TestComponent agentState="thinking" onSubmit={onSubmit} />,
     )
     const frame = lastFrame() ?? ''
-    expect(frame).toContain('disabled:true')
+    expect(frame).toContain('disabled:false')
   })
 
   it('agentState が tool_running のとき isDisabled は true', () => {

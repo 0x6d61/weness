@@ -22,6 +22,13 @@ export type AppAction =
     }
   | { readonly type: 'CONNECTED' }
   | { readonly type: 'DISCONNECTED'; readonly error?: string }
+  | { readonly type: 'TOGGLE_TOOL_OUTPUT' }
+  | { readonly type: 'SET_CONFIG'; readonly provider: string; readonly model: string }
+  | { readonly type: 'CONFIG_UPDATE'; readonly provider?: string; readonly model?: string }
+  | { readonly type: 'ENTER_PROVIDER_SELECT' }
+  | { readonly type: 'EXIT_PROVIDER_SELECT' }
+  | { readonly type: 'ENTER_MODEL_SELECT' }
+  | { readonly type: 'EXIT_MODEL_SELECT' }
 
 // =============================================================================
 // Reducer
@@ -36,7 +43,7 @@ export function appReducer(state: AppState, action: AppAction): AppState {
         content: action.text,
         timestamp: Date.now(),
       }
-      return { ...state, messages: [...state.messages, message] }
+      return { ...state, messages: [...state.messages, message], error: null }
     }
 
     case 'RESPONSE': {
@@ -113,6 +120,39 @@ export function appReducer(state: AppState, action: AppAction): AppState {
         connected: false,
         error: action.error ?? null,
       }
+    }
+
+    case 'TOGGLE_TOOL_OUTPUT': {
+      return { ...state, toolOutputExpanded: !state.toolOutputExpanded }
+    }
+
+    case 'SET_CONFIG': {
+      return { ...state, provider: action.provider, model: action.model }
+    }
+
+    case 'CONFIG_UPDATE': {
+      return {
+        ...state,
+        provider: action.provider ?? state.provider,
+        model: action.model ?? state.model,
+        error: null,
+      }
+    }
+
+    case 'ENTER_PROVIDER_SELECT': {
+      return { ...state, selectMode: 'provider' }
+    }
+
+    case 'EXIT_PROVIDER_SELECT': {
+      return { ...state, selectMode: null }
+    }
+
+    case 'ENTER_MODEL_SELECT': {
+      return { ...state, selectMode: 'model' }
+    }
+
+    case 'EXIT_MODEL_SELECT': {
+      return { ...state, selectMode: null }
     }
   }
 }

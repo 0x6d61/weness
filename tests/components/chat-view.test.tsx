@@ -21,13 +21,13 @@ describe('ChatView', () => {
       },
     ]
     const { lastFrame } = render(
-      <ChatView messages={messages} toolExecutions={[]} />,
+      <ChatView messages={messages} toolExecutions={[]} toolOutputExpanded={false} />,
     )
     const frame = lastFrame() ?? ''
     expect(frame).toContain('Hello')
     expect(frame).toContain('Hi there!')
-    // User message should have ">" prefix
-    expect(frame).toContain('>')
+    // User message should have "❯" prefix
+    expect(frame).toContain('❯')
   })
 
   it('ツール実行を描画する', () => {
@@ -43,10 +43,10 @@ describe('ChatView', () => {
       },
     ]
     const { lastFrame } = render(
-      <ChatView messages={[]} toolExecutions={toolExecutions} />,
+      <ChatView messages={[]} toolExecutions={toolExecutions} toolOutputExpanded={false} />,
     )
     const frame = lastFrame() ?? ''
-    expect(frame).toContain('shell')
+    expect(frame).toContain('Shell')
     expect(frame).toContain('ls -la')
   })
 
@@ -77,18 +77,18 @@ describe('ChatView', () => {
       },
     ]
     const { lastFrame } = render(
-      <ChatView messages={messages} toolExecutions={toolExecutions} />,
+      <ChatView messages={messages} toolExecutions={toolExecutions} toolOutputExpanded={false} />,
     )
     const frame = lastFrame() ?? ''
     // All three items should be present
     expect(frame).toContain('run ls')
-    expect(frame).toContain('shell')
+    expect(frame).toContain('Shell')
     expect(frame).toContain('here are the results')
   })
 
   it('空のメッセージとツール実行を正常に処理する', () => {
     const { lastFrame } = render(
-      <ChatView messages={[]} toolExecutions={[]} />,
+      <ChatView messages={[]} toolExecutions={[]} toolOutputExpanded={false} />,
     )
     // Should render without error
     expect(lastFrame()).toBeDefined()

@@ -8,15 +8,17 @@
  * ~/.wn/config.json が存在しない場合はセットアップウィザードを表示する。
  */
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import { render } from 'ink'
 import { createRequire } from 'node:module'
 import { dirname, join } from 'node:path'
 import { useCore } from './hooks/use-core.js'
 import { useInput } from './hooks/use-input.js'
+import { useKeyboardShortcuts } from './hooks/use-keyboard-shortcuts.js'
 import { App } from './components/App.js'
 import { SetupWizard } from './components/SetupWizard.js'
-import { checkConfigExists } from './setup/check.js'
+import { checkConfigExists, readConfig } from './setup/check.js'
+import { handleCommand } from './commands/handle-command.js'
 
 // =============================================================================
 // WnApp コンポーネント
@@ -25,14 +27,44 @@ import { checkConfigExists } from './setup/check.js'
 interface WnAppProps {
   readonly corePath: string
   readonly coreArgs?: readonly string[]
+  readonly provider: string
+  readonly model: string
 }
 
-function WnApp({ corePath, coreArgs }: WnAppProps): React.ReactElement {
-  const { state, sendInput, sendAbort } = useCore({ corePath, coreArgs })
+function WnApp({ corePath, coreArgs, provider, model }: WnAppProps): React.ReactElement {
+  const { state, dispatch, sendInput, sendAbort, sendConfigUpdate } = useCore({ corePath, coreArgs })
+
+  // 起動時に config から読んだ provider/model を state にセット
+  useEffect(() => {
+    dispatch({ type: 'SET_CONFIG', provider, model })
+  }, [dispatch, provider, model])
+
   const { value, onChange, handleSubmit, isDisabled } = useInput({
     agentState: state.agentState,
-    onSubmit: sendInput,
+    onSubmit: (text: string) => handleCommand(text, { sendInput, sendConfigUpdate, dispatch }),
   })
+
+  useKeyboardShortcuts({
+    onToggleToolOutput: () => dispatch({ type: 'TOGGLE_TOOL_OUTPUT' }),
+  })
+
+  const handleProviderSelect = useCallback((provider: string) => {
+    void sendConfigUpdate({ provider })
+    dispatch({ type: 'EXIT_PROVIDER_SELECT' })
+  }, [sendConfigUpdate, dispatch])
+
+  const handleProviderSelectCancel = useCallback(() => {
+    dispatch({ type: 'EXIT_PROVIDER_SELECT' })
+  }, [dispatch])
+
+  const handleModelSelect = useCallback((model: string) => {
+    void sendConfigUpdate({ model })
+    dispatch({ type: 'EXIT_MODEL_SELECT' })
+  }, [sendConfigUpdate, dispatch])
+
+  const handleModelSelectCancel = useCallback(() => {
+    dispatch({ type: 'EXIT_MODEL_SELECT' })
+  }, [dispatch])
 
   return (
     <App
@@ -40,6 +72,10 @@ function WnApp({ corePath, coreArgs }: WnAppProps): React.ReactElement {
       inputValue={value}
       onInputChange={onChange}
       onSubmit={handleSubmit}
+      onProviderSelect={handleProviderSelect}
+      onProviderSelectCancel={handleProviderSelectCancel}
+      onModelSelect={handleModelSelect}
+      onModelSelectCancel={handleModelSelectCancel}
     />
   )
 }
@@ -51,9 +87,11 @@ function WnApp({ corePath, coreArgs }: WnAppProps): React.ReactElement {
 interface RootProps {
   readonly corePath: string
   readonly coreArgs: readonly string[]
+  readonly provider: string
+  readonly model: string
 }
 
-function Root({ corePath, coreArgs }: RootProps): React.ReactElement | null {
+function Root({ corePath, coreArgs, provider, model }: RootProps): React.ReactElement | null {
   const [needsSetup, setNeedsSetup] = useState<boolean | null>(null)
 
   useEffect(() => {
@@ -62,7 +100,7 @@ function Root({ corePath, coreArgs }: RootProps): React.ReactElement | null {
 
   if (needsSetup === null) return null // 初期チェック中
   if (needsSetup) return <SetupWizard onComplete={() => setNeedsSetup(false)} />
-  return <WnApp corePath={corePath} coreArgs={coreArgs} />
+  return <WnApp corePath={corePath} coreArgs={coreArgs} provider={provider} model={model} />
 }
 
 // =============================================================================
@@ -99,7 +137,12 @@ function main(): void {
   const userArgs = process.argv.slice(2)
   const coreArgs = ['serve', ...userArgs]
 
-  render(<Root corePath={corePath} coreArgs={coreArgs} />)
+  // 設定ファイルから provider/model を読み込み、失敗時は 'unknown' をフォールバック
+  const configResult = readConfig()
+  const provider = configResult.ok ? configResult.data.defaultProvider : 'unknown'
+  const model = configResult.ok ? configResult.data.defaultModel : 'unknown'
+
+  render(<Root corePath={corePath} coreArgs={coreArgs} provider={provider} model={model} />)
 }
 
 main()

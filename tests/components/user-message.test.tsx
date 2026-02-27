@@ -17,12 +17,12 @@ describe('UserMessage', () => {
     expect(lastFrame()).toContain('nmap で 10.0.0.1 をスキャンして')
   })
 
-  it('">" プレフィックスを表示する', () => {
+  it('"❯" プレフィックスを表示する', () => {
     const { lastFrame } = render(<UserMessage message={baseMessage} />)
-    expect(lastFrame()).toContain('>')
+    expect(lastFrame()).toContain('❯')
   })
 
-  it('空のメッセージでも ">" プレフィックスを表示する', () => {
+  it('空のメッセージでも "❯" プレフィックスを表示する', () => {
     const emptyMessage: ChatMessage = {
       id: 'msg-2',
       role: 'user',
@@ -30,6 +30,6 @@ describe('UserMessage', () => {
       timestamp: 2000,
     }
     const { lastFrame } = render(<UserMessage message={emptyMessage} />)
-    expect(lastFrame()).toContain('>')
+    expect(lastFrame()).toContain('❯')
   })
 })

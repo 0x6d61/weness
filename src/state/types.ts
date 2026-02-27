@@ -25,6 +25,10 @@ export interface AppState {
   readonly agentState: AgentState
   readonly connected: boolean
   readonly error: string | null
+  readonly toolOutputExpanded: boolean
+  readonly provider: string | null
+  readonly model: string | null
+  readonly selectMode: 'provider' | 'model' | null
 }
 
 export const INITIAL_STATE: AppState = {
@@ -33,4 +37,8 @@ export const INITIAL_STATE: AppState = {
   agentState: 'idle',
   connected: false,
   error: null,
+  toolOutputExpanded: false,
+  provider: null,
+  model: null,
+  selectMode: null,
 }
