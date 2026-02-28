@@ -143,7 +143,7 @@ describe('App', () => {
       connected: true,
       agentState: 'idle',
       provider: 'claude',
-      model: 'claude-sonnet-4-6-20260217',
+      model: 'claude-sonnet-4-20250514',
       selectMode: 'model',
     }
     const { lastFrame } = render(

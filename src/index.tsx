@@ -19,6 +19,13 @@ import { App } from './components/App.js'
 import { SetupWizard } from './components/SetupWizard.js'
 import { checkConfigExists, readConfig } from './setup/check.js'
 import { handleCommand } from './commands/handle-command.js'
+import { DEFAULT_MODELS } from './setup/types.js'
+import type { Provider } from './setup/types.js'
+
+/** Provider 型ガード */
+function isProvider(value: string): value is Provider {
+  return value === 'claude' || value === 'openai' || value === 'ollama' || value === 'gemini'
+}
 
 // =============================================================================
 // WnApp コンポーネント
@@ -41,15 +48,20 @@ function WnApp({ corePath, coreArgs, provider, model }: WnAppProps): React.React
 
   const { value, onChange, handleSubmit, isDisabled } = useInput({
     agentState: state.agentState,
-    onSubmit: (text: string) => handleCommand(text, { sendInput, sendConfigUpdate, dispatch }),
+    onSubmit: (text: string) => handleCommand(text, { sendInput, sendConfigUpdate, dispatch, currentProvider: state.provider }),
   })
 
   useKeyboardShortcuts({
     onToggleToolOutput: () => dispatch({ type: 'TOGGLE_TOOL_OUTPUT' }),
   })
 
-  const handleProviderSelect = useCallback((provider: string) => {
-    void sendConfigUpdate({ provider })
+  const handleProviderSelect = useCallback(async (selectedProvider: string) => {
+    try {
+      const defaultModel = isProvider(selectedProvider) ? DEFAULT_MODELS[selectedProvider] : undefined
+      await sendConfigUpdate({ provider: selectedProvider, model: defaultModel })
+    } catch {
+      dispatch({ type: 'LOG', level: 'error', message: `Failed to update provider: ${selectedProvider}` })
+    }
     dispatch({ type: 'EXIT_PROVIDER_SELECT' })
   }, [sendConfigUpdate, dispatch])
 
@@ -57,8 +69,12 @@ function WnApp({ corePath, coreArgs, provider, model }: WnAppProps): React.React
     dispatch({ type: 'EXIT_PROVIDER_SELECT' })
   }, [dispatch])
 
-  const handleModelSelect = useCallback((model: string) => {
-    void sendConfigUpdate({ model })
+  const handleModelSelect = useCallback(async (selectedModel: string) => {
+    try {
+      await sendConfigUpdate({ model: selectedModel })
+    } catch {
+      dispatch({ type: 'LOG', level: 'error', message: `Failed to update model: ${selectedModel}` })
+    }
     dispatch({ type: 'EXIT_MODEL_SELECT' })
   }, [sendConfigUpdate, dispatch])
 

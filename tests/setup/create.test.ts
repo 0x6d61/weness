@@ -58,7 +58,7 @@ describe('createInitialConfig', () => {
 
       const config: WnConfig = JSON.parse(readFileSync(configPath, 'utf-8'))
       expect(config.defaultProvider).toBe('claude')
-      expect(config.defaultModel).toBe('claude-sonnet-4-6-20260217')
+      expect(config.defaultModel).toBe('claude-sonnet-4-20250514')
       expect(config.defaultPersona).toBe('default')
       expect(config.providers).toEqual({
         claude: { apiKey: 'sk-claude-key' },
@@ -92,7 +92,7 @@ describe('createInitialConfig', () => {
   // ===========================================================================
 
   describe('各プロバイダー別テスト', () => {
-    it('Claude (API Key): apiKey が設定される、モデルが claude-sonnet-4-6-20260217', () => {
+    it('Claude (API Key): apiKey が設定される、モデルが claude-sonnet-4-20250514', () => {
       const input: SetupResult = { provider: 'claude', authMethod: 'apiKey', credential: 'sk-ant-key123' }
       createInitialConfig(input, testDir)
 
@@ -100,7 +100,7 @@ describe('createInitialConfig', () => {
         readFileSync(join(testDir, '.wn', 'config.json'), 'utf-8'),
       )
       expect(config.defaultProvider).toBe('claude')
-      expect(config.defaultModel).toBe('claude-sonnet-4-6-20260217')
+      expect(config.defaultModel).toBe('claude-sonnet-4-20250514')
       expect(config.providers.claude?.apiKey).toBe('sk-ant-key123')
       expect(config.providers.claude?.authToken).toBeUndefined()
     })
@@ -113,7 +113,7 @@ describe('createInitialConfig', () => {
         readFileSync(join(testDir, '.wn', 'config.json'), 'utf-8'),
       )
       expect(config.defaultProvider).toBe('claude')
-      expect(config.defaultModel).toBe('claude-sonnet-4-6-20260217')
+      expect(config.defaultModel).toBe('claude-sonnet-4-20250514')
       expect(config.providers.claude?.authToken).toBe('oauth-token-abc')
     })
 

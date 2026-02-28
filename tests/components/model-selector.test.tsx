@@ -12,6 +12,7 @@ describe('ModelSelector', () => {
     )
     const frame = lastFrame() ?? ''
     expect(frame).toContain('Select model:')
+    expect(frame).toContain('Claude Sonnet 4')
     expect(frame).toContain('Claude Sonnet 4.6')
     expect(frame).toContain('Claude Opus 4.6')
     expect(frame).toContain('Claude Haiku 4.5')
@@ -34,9 +35,9 @@ describe('ModelSelector', () => {
     const { stdin } = render(
       <ModelSelector provider="claude" onSelect={onSelect} onCancel={onCancel} />,
     )
-    // Enter で最初の項目（Claude Sonnet 4.6）を選択
+    // Enter で最初の項目（Claude Sonnet 4）を選択
     stdin.write('\r')
-    expect(onSelect).toHaveBeenCalledWith('claude-sonnet-4-6-20260217')
+    expect(onSelect).toHaveBeenCalledWith('claude-sonnet-4-20250514')
   })
 
   it('provider が null のときエラーメッセージを表示する', () => {
