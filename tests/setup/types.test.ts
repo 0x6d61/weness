@@ -3,8 +3,8 @@ import { DEFAULT_MODELS, PROVIDER_MODELS } from '../../src/setup/types.js'
 import type { Provider } from '../../src/setup/types.js'
 
 describe('DEFAULT_MODELS', () => {
-  it('claude のデフォルトモデルは claude-sonnet-4-6-20260217 である', () => {
-    expect(DEFAULT_MODELS.claude).toBe('claude-sonnet-4-6-20260217')
+  it('claude のデフォルトモデルは claude-sonnet-4-20250514 である', () => {
+    expect(DEFAULT_MODELS.claude).toBe('claude-sonnet-4-20250514')
   })
 
   it('openai のデフォルトモデルは gpt-4.1 である', () => {
@@ -43,14 +43,19 @@ describe('PROVIDER_MODELS', () => {
     }
   })
 
+  it('claude のモデル一覧に Claude Sonnet 4 が含まれる', () => {
+    const values = PROVIDER_MODELS.claude.map((m) => m.value)
+    expect(values).toContain('claude-sonnet-4-20250514')
+  })
+
   it('claude のモデル一覧に Claude Sonnet 4.6 が含まれる', () => {
     const values = PROVIDER_MODELS.claude.map((m) => m.value)
-    expect(values).toContain('claude-sonnet-4-6-20260217')
+    expect(values).toContain('claude-sonnet-4-6')
   })
 
   it('claude のモデル一覧に Claude Opus 4.6 が含まれる', () => {
     const values = PROVIDER_MODELS.claude.map((m) => m.value)
-    expect(values).toContain('claude-opus-4-6-20260205')
+    expect(values).toContain('claude-opus-4-6')
   })
 
   it('claude のモデル一覧に Claude Haiku 4.5 が含まれる', () => {

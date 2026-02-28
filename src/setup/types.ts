@@ -16,7 +16,7 @@ export type AuthMethod = 'apiKey' | 'oauthToken'
 
 /** プロバイダーごとのデフォルトモデル */
 export const DEFAULT_MODELS: Readonly<Record<Provider, string>> = {
-  claude: 'claude-sonnet-4-6-20260217',
+  claude: 'claude-sonnet-4-20250514',
   openai: 'gpt-4.1',
   ollama: 'llama3.3',
   gemini: 'gemini-2.5-flash',
@@ -33,8 +33,9 @@ export const PROVIDER_LABELS: Readonly<Record<Provider, string>> = {
 /** プロバイダーごとのモデル一覧 */
 export const PROVIDER_MODELS: Readonly<Record<Provider, ReadonlyArray<{ label: string; value: string }>>> = {
   claude: [
-    { label: 'Claude Sonnet 4.6', value: 'claude-sonnet-4-6-20260217' },
-    { label: 'Claude Opus 4.6', value: 'claude-opus-4-6-20260205' },
+    { label: 'Claude Sonnet 4', value: 'claude-sonnet-4-20250514' },
+    { label: 'Claude Sonnet 4.6', value: 'claude-sonnet-4-6' },
+    { label: 'Claude Opus 4.6', value: 'claude-opus-4-6' },
     { label: 'Claude Haiku 4.5', value: 'claude-haiku-4-5-20251001' },
   ],
   openai: [
