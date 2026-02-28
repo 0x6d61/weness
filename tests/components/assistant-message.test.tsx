@@ -35,4 +35,33 @@ describe('AssistantMessage', () => {
     // Should render without error (empty string or whitespace)
     expect(lastFrame()).toBeDefined()
   })
+
+  it('Markdown を含むメッセージが変換されて表示される', () => {
+    const markdownMessage: ChatMessage = {
+      id: 'msg-3',
+      role: 'assistant',
+      content: '**重要**: `npm install` を実行してください',
+      timestamp: 3000,
+    }
+    const { lastFrame } = render(<AssistantMessage message={markdownMessage} />)
+    const frame = lastFrame() ?? ''
+    // テキスト内容が含まれている
+    expect(frame).toContain('重要')
+    expect(frame).toContain('npm install')
+    // Markdown の ** 記法が除去されている
+    expect(frame).not.toContain('**')
+  })
+
+  it('リストを含むメッセージが表示される', () => {
+    const listMessage: ChatMessage = {
+      id: 'msg-4',
+      role: 'assistant',
+      content: '手順:\n- ステップ1\n- ステップ2',
+      timestamp: 4000,
+    }
+    const { lastFrame } = render(<AssistantMessage message={listMessage} />)
+    const frame = lastFrame() ?? ''
+    expect(frame).toContain('ステップ1')
+    expect(frame).toContain('ステップ2')
+  })
 })
