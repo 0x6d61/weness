@@ -11,15 +11,18 @@ import { ModelSelector } from './ModelSelector.js'
 interface AppProps {
   readonly state: AppState
   readonly inputValue: string
+  readonly displayValue: string
+  readonly isMultiLine: boolean
   readonly onInputChange: (value: string) => void
   readonly onSubmit: (text: string) => void
+  readonly onClearMultiLine: () => void
   readonly onProviderSelect?: (provider: string) => void
   readonly onProviderSelectCancel?: () => void
   readonly onModelSelect?: (model: string) => void
   readonly onModelSelectCancel?: () => void
 }
 
-export function App({ state, inputValue, onInputChange, onSubmit, onProviderSelect, onProviderSelectCancel, onModelSelect, onModelSelectCancel }: AppProps): React.ReactElement {
+export function App({ state, inputValue, displayValue, isMultiLine, onInputChange, onSubmit, onClearMultiLine, onProviderSelect, onProviderSelectCancel, onModelSelect, onModelSelectCancel }: AppProps): React.ReactElement {
   const isDisabled = state.agentState === 'tool_running'
   const isActive = state.agentState === 'thinking' || state.agentState === 'tool_running'
 
@@ -51,8 +54,11 @@ export function App({ state, inputValue, onInputChange, onSubmit, onProviderSele
             />
           : <InputArea
               value={inputValue}
+              displayValue={displayValue}
+              isMultiLine={isMultiLine}
               onChange={onInputChange}
               onSubmit={onSubmit}
+              onClearMultiLine={onClearMultiLine}
               isDisabled={isDisabled}
             />
       }

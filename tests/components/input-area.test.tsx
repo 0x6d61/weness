@@ -8,8 +8,11 @@ describe('InputArea', () => {
     const { lastFrame } = render(
       <InputArea
         value=""
+        displayValue=""
+        isMultiLine={false}
         onChange={() => {}}
         onSubmit={() => {}}
+        onClearMultiLine={() => {}}
         isDisabled={false}
       />,
     )
@@ -21,8 +24,11 @@ describe('InputArea', () => {
     const { lastFrame } = render(
       <InputArea
         value="processing..."
+        displayValue="processing..."
+        isMultiLine={false}
         onChange={() => {}}
         onSubmit={() => {}}
+        onClearMultiLine={() => {}}
         isDisabled={true}
       />,
     )
@@ -34,8 +40,11 @@ describe('InputArea', () => {
     const { lastFrame } = render(
       <InputArea
         value="hello"
+        displayValue="hello"
+        isMultiLine={false}
         onChange={() => {}}
         onSubmit={() => {}}
+        onClearMultiLine={() => {}}
         isDisabled={false}
       />,
     )
@@ -47,12 +56,70 @@ describe('InputArea', () => {
     const { lastFrame } = render(
       <InputArea
         value=""
+        displayValue=""
+        isMultiLine={false}
         onChange={() => {}}
         onSubmit={() => {}}
+        onClearMultiLine={() => {}}
         isDisabled={false}
       />,
     )
     const frame = lastFrame() ?? ''
     expect(frame).toContain('│')
+  })
+
+  // =============================================================================
+  // 複数行ペースト機能のテスト
+  // =============================================================================
+
+  it('isMultiLine=true のとき displayValue を表示する', () => {
+    const { lastFrame } = render(
+      <InputArea
+        value="line1\nline2\nline3"
+        displayValue="line1 [+2 lines]"
+        isMultiLine={true}
+        onChange={() => {}}
+        onSubmit={() => {}}
+        onClearMultiLine={() => {}}
+        isDisabled={false}
+      />,
+    )
+    const frame = lastFrame() ?? ''
+    expect(frame).toContain('line1 [+2 lines]')
+  })
+
+  it('isMultiLine=true のときヒントテキストを表示する', () => {
+    const { lastFrame } = render(
+      <InputArea
+        value="line1\nline2\nline3"
+        displayValue="line1 [+2 lines]"
+        isMultiLine={true}
+        onChange={() => {}}
+        onSubmit={() => {}}
+        onClearMultiLine={() => {}}
+        isDisabled={false}
+      />,
+    )
+    const frame = lastFrame() ?? ''
+    expect(frame).toContain('Enter: send')
+    expect(frame).toContain('Esc: clear')
+  })
+
+  it('isMultiLine=false のとき通常の TextInput を表示する', () => {
+    const { lastFrame } = render(
+      <InputArea
+        value="normal text"
+        displayValue="normal text"
+        isMultiLine={false}
+        onChange={() => {}}
+        onSubmit={() => {}}
+        onClearMultiLine={() => {}}
+        isDisabled={false}
+      />,
+    )
+    const frame = lastFrame() ?? ''
+    // 通常モードでは TextInput が描画される（ヒントテキストは表示されない）
+    expect(frame).not.toContain('Enter: send')
+    expect(frame).toContain('❯')
   })
 })

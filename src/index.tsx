@@ -39,7 +39,7 @@ function WnApp({ corePath, coreArgs, provider, model }: WnAppProps): React.React
     dispatch({ type: 'SET_CONFIG', provider, model })
   }, [dispatch, provider, model])
 
-  const { value, onChange, handleSubmit, isDisabled } = useInput({
+  const { value, displayValue, isMultiLine, onChange, handleSubmit, clearMultiLine, isDisabled } = useInput({
     agentState: state.agentState,
     onSubmit: (text: string) => handleCommand(text, { sendInput, sendConfigUpdate, dispatch }),
   })
@@ -70,8 +70,11 @@ function WnApp({ corePath, coreArgs, provider, model }: WnAppProps): React.React
     <App
       state={state}
       inputValue={value}
+      displayValue={displayValue}
+      isMultiLine={isMultiLine}
       onInputChange={onChange}
       onSubmit={handleSubmit}
+      onClearMultiLine={clearMultiLine}
       onProviderSelect={handleProviderSelect}
       onProviderSelectCancel={handleProviderSelectCancel}
       onModelSelect={handleModelSelect}

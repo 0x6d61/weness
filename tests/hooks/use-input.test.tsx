@@ -18,21 +18,23 @@ function TestComponent({
   readonly onSubmit: (text: string) => Promise<void>
   readonly initialValue?: string
 }): React.ReactElement {
-  const { value, onChange, handleSubmit, isDisabled } = useInput({
+  const { value, displayValue, isMultiLine, lineCount, onChange, handleSubmit, isDisabled } = useInput({
     agentState,
     onSubmit,
   })
 
-  // initialValue を設定するための ref トリック（一度だけ呼ぶ）
+  // initialValue を useEffect で設定（レンダリング中の setState を避ける）
   const initialized = React.useRef(false)
-  if (!initialized.current && initialValue) {
-    onChange(initialValue)
-    initialized.current = true
-  }
+  React.useEffect(() => {
+    if (!initialized.current && initialValue) {
+      onChange(initialValue)
+      initialized.current = true
+    }
+  }, [onChange, initialValue])
 
   return (
     <Text>
-      {`disabled:${String(isDisabled)}|value:${value}|submit:${handleSubmit.name}`}
+      {`disabled:${String(isDisabled)}|value:${value}|multiline:${String(isMultiLine)}|lines:${lineCount}|display:${displayValue}|submit:${handleSubmit.name}`}
     </Text>
   )
 }
@@ -50,7 +52,7 @@ function SubmitTestComponent({
   readonly onSubmit: (text: string) => Promise<void>
   readonly textToSubmit: string
 }): React.ReactElement {
-  const { value, onChange, handleSubmit, isDisabled } = useInput({
+  const { value, isMultiLine, onChange, handleSubmit, isDisabled } = useInput({
     agentState,
     onSubmit,
   })
@@ -73,7 +75,49 @@ function SubmitTestComponent({
     }
   }, [value, textToSubmit, handleSubmit])
 
-  return <Text>{`disabled:${String(isDisabled)}|value:${value}`}</Text>
+  return <Text>{`disabled:${String(isDisabled)}|value:${value}|multiline:${String(isMultiLine)}`}</Text>
+}
+
+/**
+ * clearMultiLine テスト用コンポーネント
+ */
+function ClearMultiLineTestComponent({
+  agentState,
+  onSubmit,
+  initialValue,
+  shouldClear,
+}: {
+  readonly agentState: AgentState
+  readonly onSubmit: (text: string) => Promise<void>
+  readonly initialValue: string
+  readonly shouldClear: boolean
+}): React.ReactElement {
+  const { value, isMultiLine, lineCount, onChange, clearMultiLine, isDisabled } = useInput({
+    agentState,
+    onSubmit,
+  })
+
+  const initialized = React.useRef(false)
+  React.useEffect(() => {
+    if (!initialized.current) {
+      onChange(initialValue)
+      initialized.current = true
+    }
+  }, [onChange, initialValue])
+
+  const cleared = React.useRef(false)
+  React.useEffect(() => {
+    if (shouldClear && !cleared.current && isMultiLine) {
+      cleared.current = true
+      clearMultiLine()
+    }
+  }, [shouldClear, clearMultiLine, isMultiLine])
+
+  return (
+    <Text>
+      {`disabled:${String(isDisabled)}|value:${value}|multiline:${String(isMultiLine)}|lines:${lineCount}`}
+    </Text>
+  )
 }
 
 /**
@@ -172,5 +216,118 @@ describe('useInput', () => {
     // 少し待ってから onSubmit が呼ばれていないことを確認
     await new Promise((resolve) => setTimeout(resolve, 50))
     expect(onSubmit).not.toHaveBeenCalled()
+  })
+
+  // =============================================================================
+  // 複数行ペースト機能のテスト
+  // =============================================================================
+
+  it('通常入力で isMultiLine は false', async () => {
+    const onSubmit = vi.fn().mockResolvedValue(undefined)
+    const { lastFrame } = render(
+      <TestComponent agentState="idle" onSubmit={onSubmit} initialValue="hello world" />,
+    )
+    await vi.waitFor(() => {
+      const frame = lastFrame() ?? ''
+      expect(frame).toContain('value:hello world')
+      expect(frame).toContain('multiline:false')
+      expect(frame).toContain('lines:1')
+    })
+  })
+
+  it('2行の入力で isMultiLine は false', async () => {
+    const onSubmit = vi.fn().mockResolvedValue(undefined)
+    const { lastFrame } = render(
+      <TestComponent agentState="idle" onSubmit={onSubmit} initialValue={"line1\nline2"} />,
+    )
+    await vi.waitFor(() => {
+      const frame = lastFrame() ?? ''
+      expect(frame).toContain('multiline:false')
+      expect(frame).toContain('lines:2')
+    })
+  })
+
+  it('3行以上の入力で isMultiLine は true', async () => {
+    const onSubmit = vi.fn().mockResolvedValue(undefined)
+    const { lastFrame } = render(
+      <TestComponent agentState="idle" onSubmit={onSubmit} initialValue={"line1\nline2\nline3"} />,
+    )
+    await vi.waitFor(() => {
+      const frame = lastFrame() ?? ''
+      expect(frame).toContain('multiline:true')
+      expect(frame).toContain('lines:3')
+    })
+  })
+
+  it('複数行の displayValue に [+N lines] が含まれる', async () => {
+    const onSubmit = vi.fn().mockResolvedValue(undefined)
+    const { lastFrame } = render(
+      <TestComponent agentState="idle" onSubmit={onSubmit} initialValue={"first line\nsecond\nthird"} />,
+    )
+    await vi.waitFor(() => {
+      const frame = lastFrame() ?? ''
+      expect(frame).toContain('display:first line [+2 lines]')
+    })
+  })
+
+  it('50文字を超える最初の行は切り詰められる', async () => {
+    const longLine = 'a'.repeat(60)
+    const onSubmit = vi.fn().mockResolvedValue(undefined)
+    const { lastFrame } = render(
+      <TestComponent agentState="idle" onSubmit={onSubmit} initialValue={`${longLine}\nline2\nline3`} />,
+    )
+    await vi.waitFor(() => {
+      const frame = lastFrame() ?? ''
+      const truncated = 'a'.repeat(50) + '...'
+      // ink がターミナル幅でテキストを折り返すため、個別にチェックする
+      expect(frame).toContain('multiline:true')
+      expect(frame).toContain('lines:3')
+      // displayValue に切り詰められた文字列が含まれる
+      expect(frame).toContain(`display:${truncated}`)
+      // [+2 lines] が含まれる（ink の折り返しにより改行が入る場合がある）
+      expect(frame.replace(/\s+/g, '')).toContain('[+2lines]')
+    })
+  })
+
+  it('clearMultiLine で通常入力に戻る', async () => {
+    const onSubmit = vi.fn().mockResolvedValue(undefined)
+    const { lastFrame } = render(
+      <ClearMultiLineTestComponent
+        agentState="idle"
+        onSubmit={onSubmit}
+        initialValue="line1\nline2\nline3"
+        shouldClear={true}
+      />,
+    )
+
+    await vi.waitFor(() => {
+      const frame = lastFrame() ?? ''
+      expect(frame).toContain('multiline:false')
+      expect(frame).toContain('value:')
+      expect(frame).toMatch(/value:(?:$|\|)/)
+      expect(frame).toContain('lines:1')
+    })
+  })
+
+  it('handleSubmit は複数行のとき全文を送信する', async () => {
+    const onSubmit = vi.fn().mockResolvedValue(undefined)
+    const multiLineText = 'line1\nline2\nline3'
+    const { lastFrame } = render(
+      <SubmitTestComponent
+        agentState="idle"
+        onSubmit={onSubmit}
+        textToSubmit={multiLineText}
+      />,
+    )
+
+    await vi.waitFor(() => {
+      expect(onSubmit).toHaveBeenCalledWith(multiLineText)
+    })
+
+    // submit 後に multiline 状態もリセットされること
+    await vi.waitFor(() => {
+      const frame = lastFrame() ?? ''
+      expect(frame).toContain('multiline:false')
+    })
   })
 })
