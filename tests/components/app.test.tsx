@@ -34,6 +34,9 @@ describe('App', () => {
         inputValue=""
         onInputChange={() => {}}
         onSubmit={() => {}}
+        displayValue=""
+        isMultiLine={false}
+        onClearMultiLine={() => {}}
       />,
     )
     const frame = lastFrame() ?? ''
@@ -60,6 +63,9 @@ describe('App', () => {
         inputValue=""
         onInputChange={() => {}}
         onSubmit={() => {}}
+        displayValue=""
+        isMultiLine={false}
+        onClearMultiLine={() => {}}
       />,
     )
     const frame = lastFrame() ?? ''
@@ -84,6 +90,9 @@ describe('App', () => {
         inputValue=""
         onInputChange={() => {}}
         onSubmit={() => {}}
+        displayValue=""
+        isMultiLine={false}
+        onClearMultiLine={() => {}}
       />,
     )
     const frame = lastFrame() ?? ''
@@ -105,6 +114,9 @@ describe('App', () => {
         inputValue=""
         onInputChange={() => {}}
         onSubmit={() => {}}
+        displayValue=""
+        isMultiLine={false}
+        onClearMultiLine={() => {}}
       />,
     )
     const frame = lastFrame() ?? ''
@@ -126,6 +138,9 @@ describe('App', () => {
         inputValue=""
         onInputChange={() => {}}
         onSubmit={() => {}}
+        displayValue=""
+        isMultiLine={false}
+        onClearMultiLine={() => {}}
       />,
     )
     const frame = lastFrame() ?? ''
@@ -152,6 +167,9 @@ describe('App', () => {
         inputValue=""
         onInputChange={() => {}}
         onSubmit={() => {}}
+        displayValue=""
+        isMultiLine={false}
+        onClearMultiLine={() => {}}
       />,
     )
     const frame = lastFrame() ?? ''
@@ -176,6 +194,9 @@ describe('App', () => {
         inputValue=""
         onInputChange={() => {}}
         onSubmit={() => {}}
+        displayValue=""
+        isMultiLine={false}
+        onClearMultiLine={() => {}}
       />,
     )
     const frame = lastFrame() ?? ''
